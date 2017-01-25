@@ -3,7 +3,7 @@ import { lib } from '../services/lib'
 import * as Bluebird from 'bluebird'
 import * as JSData from 'js-data'
 import * as _ from 'lodash'
-import { Models, Services , Config , Interfaces} from 'js-data-dao'
+import {Config, Services, Models, Interfaces} from 'js-data-dao'
 
 /**
  * Model para os usuários
@@ -38,22 +38,22 @@ export class UserDAO extends Models.DAO<IUser> {
     storedb: JSData.DS
     serviceLib: Services.ServiceLib
     sendMail: Services.SendMail
-    constructor(store: JSData.DS, mailConfig: Config.MailConfig , appConfig: Config.AppConfig) {
+    constructor(store: JSData.DS,appConfig: Config.AppConfig) {
         const users = store.defineResource<IUser>({
-            name: 'users',
-            relations: {
-                belongsTo: {
-                    clients: {
-                        localField: 'client',
-                        localKey: 'clientId'
-                    }
-                }
-            }
+            name: 'users'
+            // relations: {
+            //     belongsTo: {
+            //         clients: {
+            //             localField: 'client',
+            //             localKey: 'clientId'
+            //         }
+            //     }
+            // }
         })
         super(users, ['clients'])
         this.storedb = store
         this.serviceLib = new Services.ServiceLib(appConfig)
-        this.sendMail = new Services.SendMail(mailConfig)
+        this.sendMail = new Services.SendMail(appConfig.mailConfig)
     }
 
     /**
@@ -104,7 +104,7 @@ export class UserDAO extends Models.DAO<IUser> {
      * 
      * @memberOf UserDAO
      */
-    public create(obj: User, userP: any): JSData.JSDataPromise<IUser> {
+    public create(obj: IUser, userP: any): JSData.JSDataPromise<IUser> {
         let user: User = new User(obj)
         let exclude: Array<string> = [
             'id', 'userId', 'active', 'isAdmin', 'updatedAt', 'createdAt', 'dataInclusao'
@@ -112,8 +112,6 @@ export class UserDAO extends Models.DAO<IUser> {
         let userValidado: string = lib.validandoUser(user)
 
         let objFilterEmail = { where: { email: { '===': user.email } } }
-        // let objFilterDoc = { where: { numDocFed: { '===': user.numDocFed } } }
-
         // Pesquisa por usuário com o email e/ou documento igual ao do novo usuário
         return this.collection.findAll(objFilterEmail)
             .then((users: Array<IUser>) => {

@@ -9,7 +9,11 @@ interface IRethinkConfig {
   db: string
 }
 
-export let adapterOptions: { default: boolean } = { default: true }
+interface IDefaultAdapterOptions {
+  default: boolean
+}
+
+export let adapterOptions: IDefaultAdapterOptions = { default: true }
 export let database: string = 'rethinkdb'
 export let rethinkConfig: IRethinkConfig = {
   host:   process.env.SERVER_RETHINKDB_HOST || 'localhost',

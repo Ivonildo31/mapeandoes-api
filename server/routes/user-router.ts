@@ -7,8 +7,8 @@ export class UserRouter extends Routes.PersistRouter<IUser, UserController> {
     controller: UserController
     router: Router
 
-    constructor (store: JSData.DS, appConfig: Config.AppConfig, mailConfig: Config.MailConfig) {
-        let ctrl = new UserController(store, appConfig, mailConfig)
+    constructor (store: JSData.DS, appConfig: Config.AppConfig) {
+        let ctrl = new UserController(store, appConfig)
         super(store, ctrl)
     }
 }

@@ -4,148 +4,21 @@
  */
 import * as dotenv from 'dotenv'
 dotenv.config()
-import * as JSData from 'js-data'
-import { database, adapter, adapterOptions } from './config/rethinkConfig'
-import { Request, Response } from 'express'
-import * as express from 'express'
-import * as path from 'path'
-import * as favicon from 'serve-favicon'
-import * as logger from 'morgan'
-import * as cookieParser from 'cookie-parser'
-import * as bodyParser from 'body-parser'
-
-/**
- * Passport
- */
-import { Passport } from 'passport'
-import * as passport from 'passport'
-import { Auth, Config, Services } from 'js-data-dao'
+import { Config, Application } from 'js-data-dao'
 
 /**
  * importacao das rotas
  */
 import * as routes from './routes'
 
-class Application {
-    app: express.Application
-    store: JSData.DS
-    passport: Passport
-    appConfig: Config.AppConfig
-    mailConfig: Config.MailConfig
-
+class MainApp extends Application {
     constructor() {
-        this.app = express()
-        this.appConfig = new Config.AppConfig()
-        this.mailConfig = new Config.MailConfig()
-        /**
-         * Chamando os Handlers
-         */
-        this.passport = passport
-        this.app = this.handleParsers(this.app)
-        this.app = this.handleLogs(this.app)
-        this.app = this.handleEnableCORS(this.app)
-        this.store = this.handleJSData()
-        this.app = this.handlePassport(this.app, this.store, this.passport)
-        this.app = this.handleRoutes(this.app, this.store, this.passport)
-        this.app = this.handleError(this.app)
-    }
-
-    handleParsers(app: express.Application): express.Application {
-        app.use(bodyParser.json())
-        app.use(bodyParser.urlencoded({ extended: false }))
-        app.use(cookieParser())
-        return app
-    }
-
-    handleLogs(app: express.Application): express.Application {
-        app.use(logger('dev'))
-        return app
-    }
-
-    handleStatics(app: express.Application): express.Application {
-        app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
-        // app.use(express.static(path.join(__dirname, '../clients/web')))
-        return app
-    }
-
-    handleEnableCORS(app: express.Application): express.Application {
-        app.use((req, res, next) => {
-            res.header('Access-Control-Allow-Origin', process.env.CORSALLOWED || '*')
-            res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-            res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type,' +
-                ' Accept, Authorization, If-Modified-Since, Cache-Control, Pragma')
-            if ('OPTIONS' === req.method) {
-                return res.send(200)
-            } else {
-                return next()
-            }
-        })
-        return app
-    }
-
-    /**
-     * adiciona a view engine
-     * middleware responsavel pelo processamento da view que atualmente utilizamos ejs
-     * 
-     * 
-     */
-    handleJSData(): JSData.DS {
-        /**
-         * Definindo o adaptador JSData para o projeto
-         */
-        const store: JSData.DS = new JSData.DS()
-        store.registerAdapter(database, adapter, adapterOptions)
-        return store
-    }
-
-    handlePassport(app: express.Application, store: JSData.DS, passport: Passport): express.Application {
-        // required for passport
-        this.passport = Auth.passportJwt(store, passport, this.appConfig)
-        app.use(this.passport.initialize())
-        return app
-    }
-
-    handleRoutes(app: express.Application, store: JSData.DS, passport: Passport): express.Application {
-        /**
-         * chamada no index para chamar todas as rotas
-         */
-        app = routes.main.callRoutes(app, store, passport , this.appConfig , this.mailConfig)
-        // catch 404 and forward to error handler
-        app.use((req: Request, res: Response, next: Function) => {
-            let err: any = new Error('Not Found')
-            err.status = 404
-            next(err)
-        })
-        return app
-    }
-
-    handleError(app: express.Application): express.Application {
-        // error handlers
-
-        // development error handler
-        // will print stacktrace
-        if (app.get('env') === 'development') {
-            app.use(function (err: any, req: Request, res: Response, next: Function) {
-                if (!(err instanceof Services.APIError)) {
-                    err = new Services.APIError(err, err.status || err.statusCode || 500)
-                }
-                res.status(err.statusCode).json(err.error)
-            })
-        }
-
-        // production error handler
-        // no stacktraces leaked to user
-        app.use(function (err: any, req: Request, res: Response, next: Function) {
-            if (!(err instanceof Services.APIError)) {
-                err = new Services.APIError(err, err.status || err.statusCode || 500)
-            }
-            res.status(err.statusCode).json(err.error)
-        })
-        return app
+        let cfg: Config.AppConfig = new Config.AppConfig()
+        super(cfg, routes.main.callRoutes)
     }
 }
 
 /**
  * para enviar a aplicacao a nivel do server será sempre levado o objeto app criado ao instanciar a aplicacao
  */
-export let application = (new Application()).app
+export let application = (new MainApp()).app

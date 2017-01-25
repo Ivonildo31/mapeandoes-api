@@ -13,6 +13,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters" : false
     },
+
     "exclude": [
         "node_modules",
         "jspm_packages"
