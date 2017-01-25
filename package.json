@@ -68,7 +68,7 @@
     "fs-extra": "^2.0.0",
     "fs-extra-promise": "^0.4.1",
     "js-data": "^2.9.0",
-    "js-data-dao": "0.0.34",
+    "js-data-dao": "0.0.37",
     "js-data-rethinkdb": "^2.2.0",
     "jsonwebtoken": "^7.1.9",
     "kerberos": "^0.0.22",
