@@ -1,4 +1,4 @@
-import { ISource , IUser } from '@prodest/mapeandoes-typings'
+import { ITheme, IUser } from '@prodest/mapeandoes-typings'
 import * as Bluebird from 'bluebird'
 import * as JSData from 'js-data'
 import * as _ from 'lodash'
@@ -8,13 +8,13 @@ import {Config, Services, Models } from 'js-data-dao'
  * classe da fonte de informação
  * 
  * @export
- * @class Source
+ * @class Theme
  * @extends {Models.BaseModel}
- * @implements {ISource}
+ * @implements {ITheme}
  */
-export class Source extends Models.BaseModel implements ISource {
+export class Theme extends Models.BaseModel implements ITheme {
     name: string
-    constructor(obj: ISource) {
+    constructor(obj: ITheme) {
         super(obj.id)
         this.name = obj.name
     }
@@ -24,16 +24,16 @@ export class Source extends Models.BaseModel implements ISource {
  * classe de persistencia da fonte de informação
  * 
  * @export
- * @class SourceDAO
- * @extends {Models.DAO<ISource>}
+ * @class ThemeDAO
+ * @extends {Models.DAO<ITheme>}
  */
-export class SourceDAO extends Models.DAO<ISource> {
+export class ThemeDAO extends Models.DAO<ITheme> {
     storedb: JSData.DS
     serviceLib: Services.ServiceLib
     sendMail: Services.SendMail
     constructor(store: JSData.DS,appConfig: Config.AppConfig) {
-        const users = store.defineResource<ISource>({
-            name: 'sources'
+        const users = store.defineResource<ITheme>({
+            name: 'themes'
         })
         super(users, [])
         this.storedb = store
@@ -44,19 +44,19 @@ export class SourceDAO extends Models.DAO<ISource> {
      * 
      * @param {User} obj
      * @param {*} userP
-     * @returns {JSData.JSDataPromise<ISource>}
+     * @returns {JSData.JSDataPromise<ITheme>}
      * 
-     * @memberOf SourceDAO
+     * @memberOf ThemeDAO
      */
-    public create(obj: ISource, userP: any): JSData.JSDataPromise<ISource> {
-        let source: Source = new Source(obj)
-        let objFilterName = { where: { email: { '===': source.name } } }
+    public create(obj: ITheme, userP: any): JSData.JSDataPromise<ITheme> {
+        let theme: Theme = new Theme(obj)
+        let objFilterName = { where: { email: { '===': theme.name } } }
         return this.collection.findAll(objFilterName)
-            .then((sources: Array<ISource>) => {
-                if (!_.isEmpty(sources)) {
+            .then((theme: Array<ITheme>) => {
+                if (!_.isEmpty(theme)) {
                     throw 'Exists other with same name'
                 } else {
-                    return this.collection.create(source)
+                    return this.collection.create(theme)
                 }
             })
             .then(() => obj)
@@ -67,38 +67,38 @@ export class SourceDAO extends Models.DAO<ISource> {
      * 
      * 
      * @param {string} id
-     * @param {ISource} obj
+     * @param {ITheme} obj
      * @param {*} user
-     * @returns {JSData.JSDataPromise<ISource>}
+     * @returns {JSData.JSDataPromise<ITheme>}
      * 
-     * @memberOf SourceDAO
+     * @memberOf ThemeDAO
      */
-    public update(id: string, user: IUser , obj: ISource): JSData.JSDataPromise<ISource> {
+    public update(id: string, user: IUser, obj: ITheme): JSData.JSDataPromise<ITheme> {
         let exclude = [
             'id','active', 'updatedAt', 'createdAt'
         ]
         let userFieldsUp = ['name']
 
-        let newObj: ISource = Services.ServiceLib.fieldsUpValidator(obj, Object.keys(obj), userFieldsUp)
+        let newObj: ITheme = Services.ServiceLib.fieldsUpValidator(obj, Object.keys(obj), userFieldsUp)
 
         return this.collection.find(id)
-            .then((source: ISource) => {
-                if (_.isEmpty(source)) { throw 'Source not found.' }
-                return Bluebird.all([source, newObj])
+            .then((theme: ITheme) => {
+                if (_.isEmpty(theme)) { throw 'Source not found.' }
+                return Bluebird.all([theme, newObj])
             })
             .then((resp: any) => {
-                let source: ISource = resp[0]
-                let newObj: ISource = resp[1]
-                return Bluebird.all([source, newObj])
+                let theme: ITheme = resp[0]
+                let newObj: ITheme = resp[1]
+                return Bluebird.all([theme, newObj])
             })
             .then((resp: any) => {
-                let source: ISource = resp[0]
-                let newObj: ISource = resp[1]
-                _.merge(source, newObj)
-                if (!Services.ServiceLib.validateFields(source, Object.keys(source), exclude)) {
+                let theme: ITheme = resp[0]
+                let newObj: ITheme = resp[1]
+                _.merge(theme, newObj)
+                if (!Services.ServiceLib.validateFields(theme, Object.keys(theme), exclude)) {
                     throw 'Alguns dados estão em branco, preencha-os e tente novamente.'
                 }
-                return this.sendUpdate(id, source)
+                return this.sendUpdate(id, theme)
             })
     }
 
@@ -108,15 +108,15 @@ export class SourceDAO extends Models.DAO<ISource> {
      * @param {string} id
      * @returns {JSData.JSDataPromise<boolean>}
      * 
-     * @memberOf SourceDAO
+     * @memberOf ThemeDAO
      */
     public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
         return this.collection.find(id)
-            .then((source: ISource) => {
-                if (_.isEmpty(source)) {
+            .then((theme: ITheme) => {
+                if (_.isEmpty(theme)) {
                     throw 'Fonte não encontrada'
                 }
-                let newObj: ISource = source
+                let newObj: ITheme = theme
                 newObj.active = false
                 return this.collection.update(id, newObj).then(() => true)
             })
@@ -126,12 +126,12 @@ export class SourceDAO extends Models.DAO<ISource> {
      * Atualiza dados da fonte de informação 
      * 
      * @param {string} id
-     * @param {ISource} obj
-     * @returns {JSData.JSDataPromise<ISource>}
+     * @param {ITheme} obj
+     * @returns {JSData.JSDataPromise<ITheme>}
      * 
-     * @memberOf SourceDAO
+     * @memberOf ThemeDAO
      */
-    public sendUpdate(id: string, obj: ISource): JSData.JSDataPromise<ISource> {
+    public sendUpdate(id: string, obj: ITheme): JSData.JSDataPromise<ITheme> {
         return this.collection.update(id, obj)
     }
 

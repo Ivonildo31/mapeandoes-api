@@ -4,6 +4,7 @@ import * as Bluebird from 'bluebird'
 import * as JSData from 'js-data'
 import * as _ from 'lodash'
 import {Config, Services, Models, Interfaces} from 'js-data-dao'
+// import {validate, Contains, IsInt, Length, IsEmail, IsFQDN, IsDate, Min, Max} from 'class-validator'
 
 /**
  * Model para os usuários
@@ -37,23 +38,13 @@ export class User extends Models.BaseModel implements IUser {
 export class UserDAO extends Models.DAO<IUser> {
     storedb: JSData.DS
     serviceLib: Services.ServiceLib
-    sendMail: Services.SendMail
     constructor(store: JSData.DS,appConfig: Config.AppConfig) {
         const users = store.defineResource<IUser>({
             name: 'users'
-            // relations: {
-            //     belongsTo: {
-            //         clients: {
-            //             localField: 'client',
-            //             localKey: 'clientId'
-            //         }
-            //     }
-            // }
         })
-        super(users, ['clients'])
+        super(users)
         this.storedb = store
         this.serviceLib = new Services.ServiceLib(appConfig)
-        this.sendMail = new Services.SendMail(appConfig.mailConfig)
     }
 
     /**
@@ -66,7 +57,8 @@ export class UserDAO extends Models.DAO<IUser> {
      * @memberOf UserDAO
      */
     public findAll(query: Object = {}, user: any): JSData.JSDataPromise<Array<IUser>> {
-        return this.collection.findAll(query, this.options)
+        return this.storedb.definitions.users.findAll(query, this.options)
+        // return this.collection.findAll(query, this.options)
             .then((users: IUser[]) => {
                 return users.map((d: IUser) => {
                     return d
@@ -128,10 +120,6 @@ export class UserDAO extends Models.DAO<IUser> {
             .then((passwordCrypted: string) => {
                 user.password = passwordCrypted
                 return this.collection.create(user)
-            })
-            .then((user: IUser) => {
-                let token: string = this.serviceLib.generateToken(user.email)
-                return this.sendMail.sendConfirmationEmail(user.email, `https://app.safetruck.com.br/app/confirmation/${token}`)
             })
             .then(() => obj)
     }
