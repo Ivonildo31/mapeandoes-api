@@ -1,13 +1,9 @@
-import { IDemand, ICategory, IDistrict, ITheme, ISource, IUser, ILocation } from '@prodest/mapeandoes-typings'
+import { IDemand, ICategory, IDistrict, ITheme, ISource, IUser, IPin } from '@prodest/mapeandoes-typings'
 import * as Bluebird from 'bluebird'
 import * as JSData from 'js-data'
 import * as _ from 'lodash'
 import { Config, Services, Models } from 'js-data-dao'
 
-export interface IPin {
-    location: ILocation,
-    description: string
-}
 /**
  * classe da fonte de informação
  * 

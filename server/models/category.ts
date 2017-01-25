@@ -1,15 +1,9 @@
-import { ICategory, IUser } from '@prodest/mapeandoes-typings'
+import { ICategory, IUser , ETravelMode } from '@prodest/mapeandoes-typings'
 import * as Bluebird from 'bluebird'
 import * as JSData from 'js-data'
 import * as _ from 'lodash'
 import { Config, Services, Models } from 'js-data-dao'
 
-export enum ETravelMode {
-    bicliclet,
-    bus,
-    car,
-    walk
-}
 /**
  * classe da fonte de informação
  * 
