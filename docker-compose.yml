@@ -1,0 +1,31 @@
+back-end:
+  environment:
+    AWS_ACCESS_ID: AKIAJ55VN2V4Y4ZXJQPA
+    AWS_ACCESS_SECRET: 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
+    AWS_IN_BUCKET: safetruck-in
+    SLACK_WEBHOOK_URL: https://hooks.slack.com/services/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
+    SAFETRUCK_ELASTICSEARCH_HOST: http://es-client.safetruck.com.br
+    SAFETRUCK_ELASTICSEARCH_PROTOCOL: http
+    SAFETRUCK_ELASTICSEARCH_AUTH: elastic:safetruck2017
+    SAFETRUCK_RETHINKDB_HOST: rethinkdb
+    SAFETRUCK_RETHINKDB_PORT: '28015'
+    SAFETRUCK_RETHINKDB_DB: safetruck
+    SAFETRUCK_ELASTICSEARCH_PORT: '9200'
+    MAX_PARALLELS: '4'
+    MAIN_COMPANY: safetruck
+    MAPS_API_KEY: AIzaSyCTyVqtTUEU9_G20pWMkmEo7b2vQe87M4k
+  ports:
+  - 3000:3000
+  volumes: 
+  - $PWD/server:/root/app/server
+  links:
+  - rethinkdb:rethinkdb
+  tty: true
+  command:
+  - /bin/sh
+  - -c
+  - node ./server/bin/www
+  build: .
+  stdin_open: true
+rethinkdb:
+  image: rethinkdb:2.3
