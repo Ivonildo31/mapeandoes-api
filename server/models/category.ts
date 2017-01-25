@@ -74,11 +74,11 @@ export class CategoryDAO extends Models.DAO<ICategory> {
      */
     public create(obj: ICategory, userP: any): JSData.JSDataPromise<ICategory> {
         let category: Category = new Category(obj)
-        let objFilterName = { where: { email: { '===': category.name } } }
+        let objFilterName = { where: { name : { '===': category.name } } }
         return this.collection.findAll(objFilterName)
             .then((categories: Array<ICategory>) => {
                 if (!_.isEmpty(categories)) {
-                    throw 'Exists other with same name'
+                    throw 'Existe outra categoria com mesmo nome'
                 } else {
                     category.idUser = userP ? userP.id : null
                     return this.collection.create(category)

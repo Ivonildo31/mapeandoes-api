@@ -32,10 +32,10 @@ export class SourceDAO extends Models.DAO<ISource> {
     serviceLib: Services.ServiceLib
     sendMail: Services.SendMail
     constructor(store: JSData.DS,appConfig: Config.AppConfig) {
-        const users = store.defineResource<ISource>({
+        const sources = store.defineResource<ISource>({
             name: 'sources'
         })
-        super(users, [])
+        super(sources, [])
         this.storedb = store
     }
 
@@ -50,16 +50,16 @@ export class SourceDAO extends Models.DAO<ISource> {
      */
     public create(obj: ISource, userP: any): JSData.JSDataPromise<ISource> {
         let source: Source = new Source(obj)
-        let objFilterName = { where: { email: { '===': source.name } } }
+        let objFilterName = { where: { name: { '===': source.name } } }
         return this.collection.findAll(objFilterName)
             .then((sources: Array<ISource>) => {
                 if (!_.isEmpty(sources)) {
-                    throw 'Exists other with same name'
+                    throw 'Existe outra fonte com mesmo nome'
                 } else {
                     return this.collection.create(source)
                 }
             })
-            .then(() => obj)
+            .then((added: ISource) => added)
     }
 
     /**

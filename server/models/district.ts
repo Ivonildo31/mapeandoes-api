@@ -21,8 +21,10 @@ export class District extends Models.BaseModel implements IDistrict {
     constructor(obj: IDistrict) {
         super(obj.id)
         this.name = obj.name
-        this.location.lat = obj.location.lat
-        this.location.lon = obj.location.lon
+        this.location = {
+            lat : obj.location.lat,
+            lon : obj.location.lon
+        }
     }
 }
 
@@ -39,7 +41,7 @@ export class DistrictDAO extends Models.DAO<IDistrict> {
     sendMail: Services.SendMail
     constructor(store: JSData.DS, appConfig: Config.AppConfig) {
         const districts = store.defineResource<IDistrict>({
-            name: 'categories'
+            name: 'districts'
         })
         super(districts)
         this.storedb = store
@@ -55,14 +57,14 @@ export class DistrictDAO extends Models.DAO<IDistrict> {
      * @memberOf SourceDAO
      */
     public create(obj: IDistrict, userP: any): JSData.JSDataPromise<IDistrict> {
-        let districts: District = new District(obj)
-        let objFilterName = { where: { email: { '===': districts.name } } }
+        let district: District = new District(obj)
+        let objFilterName = { where: { name: { '===': district.name } } }
         return this.collection.findAll(objFilterName)
             .then((districts: Array<IDistrict>) => {
                 if (!_.isEmpty(districts)) {
-                    throw 'Exists other with same name'
+                    throw 'Existe outro distrito com o mesmo nome'
                 } else {
-                    return this.collection.create(districts)
+                    return this.collection.create(district)
                 }
             })
             .then(() => obj)

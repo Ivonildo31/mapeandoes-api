@@ -50,10 +50,10 @@ export class ThemeDAO extends Models.DAO<ITheme> {
      */
     public create(obj: ITheme, userP: any): JSData.JSDataPromise<ITheme> {
         let theme: Theme = new Theme(obj)
-        let objFilterName = { where: { email: { '===': theme.name } } }
+        let objFilterName = { where: { name: { '===': theme.name } } }
         return this.collection.findAll(objFilterName)
-            .then((theme: Array<ITheme>) => {
-                if (!_.isEmpty(theme)) {
+            .then((themes: Array<ITheme>) => {
+                if (!_.isEmpty(themes)) {
                     throw 'Exists other with same name'
                 } else {
                     return this.collection.create(theme)
@@ -83,7 +83,7 @@ export class ThemeDAO extends Models.DAO<ITheme> {
 
         return this.collection.find(id)
             .then((theme: ITheme) => {
-                if (_.isEmpty(theme)) { throw 'Source not found.' }
+                if (_.isEmpty(theme)) { throw 'Temática não encontrada.' }
                 return Bluebird.all([theme, newObj])
             })
             .then((resp: any) => {

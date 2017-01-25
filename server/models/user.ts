@@ -57,8 +57,7 @@ export class UserDAO extends Models.DAO<IUser> {
      * @memberOf UserDAO
      */
     public findAll(query: Object = {}, user: any): JSData.JSDataPromise<Array<IUser>> {
-        return this.storedb.definitions.users.findAll(query, this.options)
-        // return this.collection.findAll(query, this.options)
+        return this.collection.findAll(query, this.options)
             .then((users: IUser[]) => {
                 return users.map((d: IUser) => {
                     return d
