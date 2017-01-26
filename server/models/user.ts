@@ -3,7 +3,7 @@ import { lib } from '../services/lib'
 import * as Bluebird from 'bluebird'
 import * as JSData from 'js-data'
 import * as _ from 'lodash'
-import {Config, Services, Models, Interfaces} from 'js-data-dao'
+import { Config, Services, Models, Interfaces } from 'js-data-dao'
 // import {validate, Contains, IsInt, Length, IsEmail, IsFQDN, IsDate, Min, Max} from 'class-validator'
 
 /**
@@ -14,250 +14,250 @@ import {Config, Services, Models, Interfaces} from 'js-data-dao'
  */
 
 export class User extends Models.BaseModel implements IUser {
-    name: string
-    email: string
-    username: string
-    companyAlias: string
-    password: string
-    newPassword?: string
-    isAdmin: boolean
-    externalId: string
+  name: string
+  email: string
+  username: string
+  companyAlias: string
+  password: string
+  newPassword?: string
+  isAdmin: boolean
+  externalId: string
 
-    constructor(obj: IUser) {
-        super(obj.id)
-        this.name = obj.name
-        this.email = obj.email
-        this.username = obj.username
-        this.password = obj.password
-        this.isAdmin = obj.isAdmin || false
-        this.externalId = obj.externalId
-        this.companyAlias = obj.companyAlias
-    }
+  constructor(obj: IUser) {
+    super(obj.id)
+    this.name = obj.name
+    this.email = obj.email
+    this.username = obj.username
+    this.password = obj.password
+    this.isAdmin = obj.isAdmin || false
+    this.externalId = obj.externalId
+    this.companyAlias = obj.companyAlias
+  }
 }
 
 export class UserDAO extends Models.DAO<IUser> {
-    storedb: JSData.DS
-    serviceLib: Services.ServiceLib
-    constructor(store: JSData.DS,appConfig: Config.AppConfig) {
-        const users = store.defineResource<IUser>({
-            name: 'users'
+  storedb: JSData.DS
+  serviceLib: Services.ServiceLib
+  constructor(store: JSData.DS, appConfig: Config.AppConfig) {
+    const users = store.defineResource<IUser>({
+      name: 'users'
+    })
+    super(users)
+    this.storedb = store
+    this.serviceLib = new Services.ServiceLib(appConfig)
+  }
+
+  /**
+   * busca todos os usuários
+   * 
+   * @param {Object} [query={}]
+   * @param {*} user
+   * @returns {JSData.JSDataPromise<Array<IUser>>}
+   * 
+   * @memberOf UserDAO
+   */
+  public findAll(query: Object = {}, user: any): JSData.JSDataPromise<Array<IUser>> {
+    return this.collection.findAll(query, this.options)
+      .then((users: IUser[]) => {
+        return users.map((d: IUser) => {
+          return d
         })
-        super(users)
-        this.storedb = store
-        this.serviceLib = new Services.ServiceLib(appConfig)
-    }
+      })
+  }
 
-    /**
-     * busca todos os usuários
-     * 
-     * @param {Object} [query={}]
-     * @param {*} user
-     * @returns {JSData.JSDataPromise<Array<IUser>>}
-     * 
-     * @memberOf UserDAO
-     */
-    public findAll(query: Object = {}, user: any): JSData.JSDataPromise<Array<IUser>> {
-        return this.collection.findAll(query, this.options)
-            .then((users: IUser[]) => {
-                return users.map((d: IUser) => {
-                    return d
-                })
-            })
-    }
+  /**
+   * Find aplicando auto-relacionamento manual de usuário para usuário
+   * por conta do bug do belongsTo dando erro
+   * 
+   * @param {string} id
+   * @param {*} user
+   * @returns {JSData.JSDataPromise<IUser>}
+   * 
+   * @memberOf UserDAO
+   */
+  public find(id: string, user: any): JSData.JSDataPromise<IUser> {
+    return this.collection.find(id, this.options)
+      .then((user: IUser) => {
+        if (user.active) {
+          return user
+        } else {
+          throw 'Usuário não encontrado'
+        }
+      })
+  }
 
-    /**
-     * Find aplicando auto-relacionamento manual de usuário para usuário
-     * por conta do bug do belongsTo dando erro
-     * 
-     * @param {string} id
-     * @param {*} user
-     * @returns {JSData.JSDataPromise<IUser>}
-     * 
-     * @memberOf UserDAO
-     */
-    public find(id: string, user: any): JSData.JSDataPromise<IUser> {
-        return this.collection.find(id, this.options)
-            .then((user: IUser) => {
-                if (user.active) {
-                    return user
-                } else {
-                    throw 'Usuário não encontrado'
-                }
-            })
-    }
+  /**
+   * Cria um novo usuário
+   * 
+   * @param {User} obj
+   * @param {*} userP
+   * @returns {JSData.JSDataPromise<IUser>}
+   * 
+   * @memberOf UserDAO
+   */
+  public create(obj: IUser, userP: any): JSData.JSDataPromise<IUser> {
+    let user: User = new User(obj)
+    let exclude: Array<string> = [
+      'id', 'userId', 'active', 'isAdmin', 'updatedAt', 'createdAt', 'dataInclusao'
+    ]
+    let userValidado: string = lib.validandoUser(user)
 
-    /**
-     * Cria um novo usuário
-     * 
-     * @param {User} obj
-     * @param {*} userP
-     * @returns {JSData.JSDataPromise<IUser>}
-     * 
-     * @memberOf UserDAO
-     */
-    public create(obj: IUser, userP: any): JSData.JSDataPromise<IUser> {
-        let user: User = new User(obj)
-        let exclude: Array<string> = [
-            'id', 'userId', 'active', 'isAdmin', 'updatedAt', 'createdAt', 'dataInclusao'
-        ]
-        let userValidado: string = lib.validandoUser(user)
+    let objFilterEmail = { where: { email: { '===': user.email } } }
+    // Pesquisa por usuário com o email e/ou documento igual ao do novo usuário
+    return this.collection.findAll(objFilterEmail)
+      .then((users: Array<IUser>) => {
+        if (!_.isEmpty(users)) {
+          throw 'O email já existe em outro usuário.'
+        } else if (userValidado) {
+          throw userValidado
+        } else if (!Services.ServiceLib.validateFields(user, Object.keys(user), exclude)) {
+          throw 'Alguns dados são obrigatórios, preencha-os e tente novamente.'
+        } else {
+          return Services.ServiceLib.hashPassword(user.password)
+        }
+      })
+      .then((passwordCrypted: string) => {
+        user.password = passwordCrypted
+        return this.collection.create(user)
+      })
+      .then(() => obj)
+  }
 
-        let objFilterEmail = { where: { email: { '===': user.email } } }
-        // Pesquisa por usuário com o email e/ou documento igual ao do novo usuário
-        return this.collection.findAll(objFilterEmail)
-            .then((users: Array<IUser>) => {
-                if (!_.isEmpty(users)) {
-                    throw 'O email já existe em outro usuário.'
-                } else if (userValidado) {
-                    throw userValidado
-                } else if (!Services.ServiceLib.validateFields(user, Object.keys(user), exclude)) {
-                    throw 'Alguns dados são obrigatórios, preencha-os e tente novamente.'
-                } else {
-                    return Services.ServiceLib.hashPassword(user.password)
-                }
-            })
-            .then((passwordCrypted: string) => {
-                user.password = passwordCrypted
-                return this.collection.create(user)
-            })
-            .then(() => obj)
-    }
+  /**
+   * Atualiza os dados básicos do usuário
+   * Como dados pessoais, email e senha.
+   * 
+   * @param {string} id
+   * @param {IUser} obj
+   * @param {*} user
+   * @returns {JSData.JSDataPromise<IUser>}
+   * 
+   * @memberOf UserDAO
+   */
+  public update(id: string, obj: IUser, user: any): JSData.JSDataPromise<IUser> {
+    let exclude = [
+      'id', 'userId', 'active', 'isAdmin', 'updatedAt', 'createdAt', 'dataInclusao'
+    ]
+    let userFieldsUp = ['name', 'email', 'password', 'newPassword', 'telephone', 'zipCode',
+      'address', 'number', 'complement', 'neighbor', 'city', 'state', 'country']
 
-    /**
-     * Atualiza os dados básicos do usuário
-     * Como dados pessoais, email e senha.
-     * 
-     * @param {string} id
-     * @param {IUser} obj
-     * @param {*} user
-     * @returns {JSData.JSDataPromise<IUser>}
-     * 
-     * @memberOf UserDAO
-     */
-    public update(id: string, obj: IUser, user: any): JSData.JSDataPromise<IUser> {
-        let exclude = [
-            'id', 'userId', 'active', 'isAdmin', 'updatedAt', 'createdAt', 'dataInclusao'
-        ]
-        let userFieldsUp = ['name', 'email', 'password', 'newPassword', 'telephone', 'zipCode',
-            'address', 'number', 'complement', 'neighbor', 'city', 'state', 'country']
+    let newObj: IUser = Services.ServiceLib.fieldsUpValidator(obj, Object.keys(obj), userFieldsUp)
 
-        let newObj: IUser = Services.ServiceLib.fieldsUpValidator(obj, Object.keys(obj), userFieldsUp)
+    return this.collection.find(id)
+      .then((user: IUser) => {
+        if (_.isEmpty(user)) { throw 'Usuário não encontrado.' }
+        if (newObj.password) {
+          if (newObj.newPassword.length < 6) {
+            throw 'A nova senha deve conter no mínimo 6 caracteres.'
+          }
+          return Bluebird.all([user, newObj, Services.ServiceLib.comparePassword(newObj.password, user.password)])
+        }
+        return Bluebird.all([user, newObj])
+      })
+      .then((resp: any) => {
+        let user: IUser = resp[0]
+        let newObj: IUser = resp[1]
+        let passwordCompared: boolean = resp[2]
 
-        return this.collection.find(id)
-            .then((user: IUser) => {
-                if (_.isEmpty(user)) { throw 'Usuário não encontrado.' }
-                if (newObj.password) {
-                    if (newObj.newPassword.length < 6) {
-                        throw 'A nova senha deve conter no mínimo 6 caracteres.'
-                    }
-                    return Bluebird.all([user, newObj, Services.ServiceLib.comparePassword(newObj.password, user.password)])
-                }
-                return Bluebird.all([user, newObj])
-            })
-            .then((resp: any) => {
-                let user: IUser = resp[0]
-                let newObj: IUser = resp[1]
-                let passwordCompared: boolean = resp[2]
+        if (passwordCompared) {
+          return Bluebird.all([user, newObj, Services.ServiceLib.hashPassword(newObj.newPassword)])
+        } else if (typeof passwordCompared === 'undefined') {
+          return Bluebird.all([user, newObj])
+        } else {
+          throw 'A senha atual está incorreta'
+        }
+      })
+      .then((resp: any) => {
+        let user: IUser = resp[0]
+        let newObj: IUser = resp[1]
+        let passwordCrypted = resp[2]
 
-                if (passwordCompared) {
-                    return Bluebird.all([user, newObj, Services.ServiceLib.hashPassword(newObj.newPassword)])
-                } else if (typeof passwordCompared === 'undefined') {
-                    return Bluebird.all([user, newObj])
-                } else {
-                    throw 'A senha atual está incorreta'
-                }
-            })
-            .then((resp: any) => {
-                let user: IUser = resp[0]
-                let newObj: IUser = resp[1]
-                let passwordCrypted = resp[2]
+        if (passwordCrypted) {
+          newObj.password = passwordCrypted
+        } else {
+          delete newObj.password
+        }
+        delete newObj.newPassword
+        _.merge(user, newObj)
 
-                if (passwordCrypted) {
-                    newObj.password = passwordCrypted
-                } else {
-                    delete newObj.password
-                }
-                delete newObj.newPassword
-                _.merge(user, newObj)
+        if (user.name.length < 6) {
+          throw 'O nome deve conter no mínimo 6 letras.'
+          // } else if (user.email && !EmailValidator.validate(user.email)) {
+          //     throw 'O email possui um formato inválido.'
+        } else if (!Services.ServiceLib.validateFields(user, Object.keys(user), exclude)) {
+          throw 'Alguns dados estão em branco, preencha-os e tente novamente.'
+        }
+        return this.sendUpdate(id, user)
+      })
+  }
 
-                if (user.name.length < 6) {
-                    throw 'O nome deve conter no mínimo 6 letras.'
-                    // } else if (user.email && !EmailValidator.validate(user.email)) {
-                    //     throw 'O email possui um formato inválido.'
-                } else if (!Services.ServiceLib.validateFields(user, Object.keys(user), exclude)) {
-                    throw 'Alguns dados estão em branco, preencha-os e tente novamente.'
-                }
-                return this.sendUpdate(id, user)
-            })
-    }
+  /**
+   * Deleta um usuário
+   * 
+   * @param {string} id
+   * @returns {JSData.JSDataPromise<boolean>}
+   * 
+   * @memberOf UserDAO
+   */
+  public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
+    return this.collection.find(id)
+      .then((user: IUser) => {
+        if (_.isEmpty(user)) {
+          throw 'Usuário não encontrado'
+        }
+        let newObj: IUser = user
+        newObj.active = false
+        return this.collection.update(id, newObj).then(() => true)
+      })
+  }
 
-    /**
-     * Deleta um usuário
-     * 
-     * @param {string} id
-     * @returns {JSData.JSDataPromise<boolean>}
-     * 
-     * @memberOf UserDAO
-     */
-    public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
-        return this.collection.find(id)
-            .then((user: IUser) => {
-                if (_.isEmpty(user)) {
-                    throw 'Usuário não encontrado'
-                }
-                let newObj: IUser = user
-                newObj.active = false
-                return this.collection.update(id, newObj).then(() => true)
-            })
-    }
+  /**
+   * Atualiza dados de usuário
+   * 
+   * @param {string} id
+   * @param {IUser} obj
+   * @returns {JSData.JSDataPromise<IUser>}
+   * 
+   * @memberOf UserDAO
+   */
+  public sendUpdate(id: string, obj: IUser): JSData.JSDataPromise<IUser> {
+    return this.collection.update(id, obj)
+  }
 
-    /**
-     * Atualiza dados de usuário
-     * 
-     * @param {string} id
-     * @param {IUser} obj
-     * @returns {JSData.JSDataPromise<IUser>}
-     * 
-     * @memberOf UserDAO
-     */
-    public sendUpdate(id: string, obj: IUser): JSData.JSDataPromise<IUser> {
-        return this.collection.update(id, obj)
-    }
+  /**
+   * realize search query using limits and page control
+   * 
+   * @param {Object} search
+   * @param {*} user
+   * @param {number} [page]
+   * @param {number} [limit]
+   * @param {string[]} [order]
+   * @returns {JSData.JSDataPromise<IResultSearch<IUser>>}
+   * 
+   * @memberOf UserDAO
+   */
+  paginatedQuery(
+    search: Object, user: any, page?: number, limit?: number, order?: string[]
+  ): JSData.JSDataPromise<Interfaces.IResultSearch<IUser>> {
+    let _page: number = page || 1
+    let _limit: number = limit || 10
+    let _order: string[] = []
+    let params = Object.assign({}, search, {
+      orderBy: _order,
+      offset: _limit * (_page - 1),
+      limit: _limit
+    })
 
-    /**
-     * realize search query using limits and page control
-     * 
-     * @param {Object} search
-     * @param {*} user
-     * @param {number} [page]
-     * @param {number} [limit]
-     * @param {string[]} [order]
-     * @returns {JSData.JSDataPromise<IResultSearch<IUser>>}
-     * 
-     * @memberOf UserDAO
-     */
-    paginatedQuery(
-        search: Object, user: any, page?: number, limit?: number, order?: string[]
-    ): JSData.JSDataPromise<Interfaces.IResultSearch<IUser>> {
-        let _page: number = page || 1
-        let _limit: number = limit || 10
-        let _order: string[] = []
-        let params = Object.assign({}, search, {
-            orderBy: _order,
-            offset: _limit * (_page - 1),
-            limit: _limit
-        })
-
-        return Bluebird.all([
-            this.collection.findAll(search),
-            this.collection.findAll(params)
-        ])
-            .then((resp: any) => {
-                return {
-                    page: _page,
-                    total: resp[0].length,
-                    result: resp[1]
-                } as Interfaces.IResultSearch<IUser>
-            })
-    }
+    return Bluebird.all([
+      this.collection.findAll(search),
+      this.collection.findAll(params)
+    ])
+      .then((resp: any) => {
+        return {
+          page: _page,
+          total: resp[0].length,
+          result: resp[1]
+        } as Interfaces.IResultSearch<IUser>
+      })
+  }
 }
