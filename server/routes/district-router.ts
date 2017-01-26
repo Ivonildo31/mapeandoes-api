@@ -1,10 +1,10 @@
 import * as JSData from 'js-data'
 import { DistrictController } from '../controllers'
-import {Routes, Config} from 'js-data-dao'
-import {IDistrict} from '@prodest/mapeandoes-typings'
+import { Routes, Config } from 'js-data-dao'
+import { IDistrict } from '@prodest/mapeandoes-typings'
 export class DistrictRouter extends Routes.PersistRouter<IDistrict, DistrictController> {
-    constructor (store: JSData.DS, appConfig: Config.AppConfig) {
-        let ctrl = new DistrictController(store, appConfig)
-        super(store, ctrl)
-    }
+  constructor(store: JSData.DS, appConfig: Config.AppConfig) {
+    let ctrl = new DistrictController(store, appConfig)
+    super(store, ctrl)
+  }
 }

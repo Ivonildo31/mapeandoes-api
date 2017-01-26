@@ -1,11 +1,11 @@
-import {Controllers} from 'js-data-dao/lib/'
+import { Controllers } from 'js-data-dao/lib/'
 import { UserDAO } from '../models/user'
 import { ISource } from '@prodest/mapeandoes-typings'
 import * as JSData from 'js-data'
-import {Config} from 'js-data-dao'
+import { Config } from 'js-data-dao'
 
 export class UserController extends Controllers.BasePersistController<ISource> {
-    public constructor(store: JSData.DS, appConfig: Config.AppConfig) {
-        super(new UserDAO(store,appConfig))
-    }
+  public constructor(store: JSData.DS, appConfig: Config.AppConfig) {
+    super(new UserDAO(store, appConfig))
+  }
 }
