@@ -12,10 +12,10 @@ import { Config, Application } from 'js-data-dao'
 import * as routes from './routes'
 
 class MainApp extends Application {
-    constructor() {
-        let cfg: Config.AppConfig = new Config.AppConfig()
-        super(cfg, routes.main.callRoutes)
-    }
+  constructor() {
+    let cfg: Config.AppConfig = new Config.AppConfig()
+    super(cfg, routes.main.callRoutes)
+  }
 }
 
 /**
