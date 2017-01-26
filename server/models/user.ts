@@ -49,11 +49,11 @@ export class UserDAO extends Models.DAO<IUser> {
 
   /**
    * busca todos os usuários
-   * 
+   *
    * @param {Object} [query={}]
    * @param {*} user
    * @returns {JSData.JSDataPromise<Array<IUser>>}
-   * 
+   *
    * @memberOf UserDAO
    */
   public findAll(query: Object = {}, user: any): JSData.JSDataPromise<Array<IUser>> {
@@ -68,11 +68,11 @@ export class UserDAO extends Models.DAO<IUser> {
   /**
    * Find aplicando auto-relacionamento manual de usuário para usuário
    * por conta do bug do belongsTo dando erro
-   * 
+   *
    * @param {string} id
    * @param {*} user
    * @returns {JSData.JSDataPromise<IUser>}
-   * 
+   *
    * @memberOf UserDAO
    */
   public find(id: string, user: any): JSData.JSDataPromise<IUser> {
@@ -88,11 +88,11 @@ export class UserDAO extends Models.DAO<IUser> {
 
   /**
    * Cria um novo usuário
-   * 
+   *
    * @param {User} obj
    * @param {*} userP
    * @returns {JSData.JSDataPromise<IUser>}
-   * 
+   *
    * @memberOf UserDAO
    */
   public create(obj: IUser, userP: any): JSData.JSDataPromise<IUser> {
@@ -126,12 +126,12 @@ export class UserDAO extends Models.DAO<IUser> {
   /**
    * Atualiza os dados básicos do usuário
    * Como dados pessoais, email e senha.
-   * 
+   *
    * @param {string} id
    * @param {IUser} obj
    * @param {*} user
    * @returns {JSData.JSDataPromise<IUser>}
-   * 
+   *
    * @memberOf UserDAO
    */
   public update(id: string, obj: IUser, user: any): JSData.JSDataPromise<IUser> {
@@ -193,10 +193,10 @@ export class UserDAO extends Models.DAO<IUser> {
 
   /**
    * Deleta um usuário
-   * 
+   *
    * @param {string} id
    * @returns {JSData.JSDataPromise<boolean>}
-   * 
+   *
    * @memberOf UserDAO
    */
   public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
@@ -213,11 +213,11 @@ export class UserDAO extends Models.DAO<IUser> {
 
   /**
    * Atualiza dados de usuário
-   * 
+   *
    * @param {string} id
    * @param {IUser} obj
    * @returns {JSData.JSDataPromise<IUser>}
-   * 
+   *
    * @memberOf UserDAO
    */
   public sendUpdate(id: string, obj: IUser): JSData.JSDataPromise<IUser> {
@@ -226,14 +226,14 @@ export class UserDAO extends Models.DAO<IUser> {
 
   /**
    * realize search query using limits and page control
-   * 
+   *
    * @param {Object} search
    * @param {*} user
    * @param {number} [page]
    * @param {number} [limit]
    * @param {string[]} [order]
    * @returns {JSData.JSDataPromise<IResultSearch<IUser>>}
-   * 
+   *
    * @memberOf UserDAO
    */
   paginatedQuery(
