@@ -62,8 +62,8 @@ gulp.task('test', ['pre-test'], () => runTest()
 
 gulp.task('test-coverage', ['pre-test'], function () {
   return runTest()
-  .once('error', () => process.exit(1))
-  .pipe(istanbul.writeReports({
+    .once('error', () => process.exit(1))
+    .pipe(istanbul.writeReports({
       reporters: ['json'] // this yields a basic non-sourcemapped coverage.json file
     }))
 })
