@@ -47,11 +47,10 @@ export class Demand extends Models.BaseModel implements IDemand {
  * @extends {Models.DAO<ISource>}
  */
 export class DemandDAO extends Models.DAO<IDemand> {
-  storedb: JSData.DS
+  storedb: JSData.DataStore
   serviceLib: Services.ServiceLib
-  constructor(store: JSData.DS, appConfig: Config.AppConfig) {
-    const demands = store.defineResource<IDemand>({
-      name: 'demands',
+  constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
+    const demands = store.defineMapper('demands',{
       relations: {
         belongsTo: {
           users: {
@@ -78,11 +77,11 @@ export class DemandDAO extends Models.DAO<IDemand> {
    *
    * @param {User} obj
    * @param {*} userP
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public create(obj: IDemand, userP: any): JSData.JSDataPromise<IDemand> {
+  public create(obj: IDemand, userP: any): Promise<IDemand> {
     let demand: Demand = new Demand(obj)
     return this.collection.create(demand)
   }
@@ -94,11 +93,11 @@ export class DemandDAO extends Models.DAO<IDemand> {
    * @param {string} id
    * @param {ICategory} obj
    * @param {*} user
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public update(id: string, user: IUser, obj: IDemand): JSData.JSDataPromise<IDemand> {
+  public update(id: string, user: IUser, obj: IDemand): Promise<IDemand> {
     let exclude = [
       'id', 'active', 'updatedAt', 'createdAt', 'user', 'source', 'category'
     ]
@@ -132,11 +131,11 @@ export class DemandDAO extends Models.DAO<IDemand> {
    * Deleta uma fonte de informação
    *
    * @param {string} id
-   * @returns {JSData.JSDataPromise<boolean>}
+   * @returns {Promise<boolean>}
    *
    * @memberOf SourceDAO
    */
-  public delete(id: string, user: IUser): JSData.JSDataPromise<boolean> {
+  public delete(id: string, user: IUser): Promise<boolean> {
     return this.collection.find(id)
       .then((demand: IDemand) => {
         if (_.isEmpty(demand)) {
@@ -153,11 +152,11 @@ export class DemandDAO extends Models.DAO<IDemand> {
    *
    * @param {string} id
    * @param {ICategory} obj
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public sendUpdate(id: string, obj: IDemand): JSData.JSDataPromise<IDemand> {
+  public sendUpdate(id: string, obj: IDemand): Promise<IDemand> {
     return this.collection.update(id, obj)
   }
 

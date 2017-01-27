@@ -5,7 +5,7 @@ import * as JSData from 'js-data'
 import { Config } from 'js-data-dao'
 
 export class DemandController extends Controllers.BasePersistController<IDemand> {
-  public constructor(store: JSData.DS, appConfig: Config.AppConfig) {
+  public constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
     super(new DemandDAO(store, appConfig))
   }
 }

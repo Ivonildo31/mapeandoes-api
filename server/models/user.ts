@@ -36,12 +36,10 @@ export class User extends Models.BaseModel implements IUser {
 }
 
 export class UserDAO extends Models.DAO<IUser> {
-  storedb: JSData.DS
+  storedb: JSData.DataStore
   serviceLib: Services.ServiceLib
-  constructor(store: JSData.DS, appConfig: Config.AppConfig) {
-    const users = store.defineResource<IUser>({
-      name: 'users'
-    })
+  constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
+    const users = store.defineMapper('users')
     super(users)
     this.storedb = store
     this.serviceLib = new Services.ServiceLib(appConfig)
@@ -52,11 +50,11 @@ export class UserDAO extends Models.DAO<IUser> {
    *
    * @param {Object} [query={}]
    * @param {*} user
-   * @returns {JSData.JSDataPromise<Array<IUser>>}
+   * @returns {Promise<Array<IUser>>}
    *
    * @memberOf UserDAO
    */
-  public findAll(query: Object = {}, user: any): JSData.JSDataPromise<Array<IUser>> {
+  public findAll(query: Object = {}, user: any): Promise<Array<IUser>> {
     return this.collection.findAll(query, this.options)
       .then((users: IUser[]) => {
         return users.map((d: IUser) => {
@@ -71,11 +69,11 @@ export class UserDAO extends Models.DAO<IUser> {
    *
    * @param {string} id
    * @param {*} user
-   * @returns {JSData.JSDataPromise<IUser>}
+   * @returns {Promise<IUser>}
    *
    * @memberOf UserDAO
    */
-  public find(id: string, user: any): JSData.JSDataPromise<IUser> {
+  public find(id: string, user: any): Promise<IUser> {
     return this.collection.find(id, this.options)
       .then((user: IUser) => {
         if (user.active) {
@@ -91,11 +89,11 @@ export class UserDAO extends Models.DAO<IUser> {
    *
    * @param {User} obj
    * @param {*} userP
-   * @returns {JSData.JSDataPromise<IUser>}
+   * @returns {Promise<IUser>}
    *
    * @memberOf UserDAO
    */
-  public create(obj: IUser, userP: any): JSData.JSDataPromise<IUser> {
+  public create(obj: IUser, userP: any): Promise<IUser> {
     let user: User = new User(obj)
     let exclude: Array<string> = [
       'id', 'userId', 'active', 'isAdmin', 'updatedAt', 'createdAt', 'dataInclusao'
@@ -130,11 +128,11 @@ export class UserDAO extends Models.DAO<IUser> {
    * @param {string} id
    * @param {IUser} obj
    * @param {*} user
-   * @returns {JSData.JSDataPromise<IUser>}
+   * @returns {Promise<IUser>}
    *
    * @memberOf UserDAO
    */
-  public update(id: string, obj: IUser, user: any): JSData.JSDataPromise<IUser> {
+  public update(id: string, obj: IUser, user: any): Promise<IUser> {
     let exclude = [
       'id', 'userId', 'active', 'isAdmin', 'updatedAt', 'createdAt', 'dataInclusao'
     ]
@@ -195,11 +193,11 @@ export class UserDAO extends Models.DAO<IUser> {
    * Deleta um usuário
    *
    * @param {string} id
-   * @returns {JSData.JSDataPromise<boolean>}
+   * @returns {Promise<boolean>}
    *
    * @memberOf UserDAO
    */
-  public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
+  public delete(id: string, user: any): Promise<boolean> {
     return this.collection.find(id)
       .then((user: IUser) => {
         if (_.isEmpty(user)) {
@@ -216,11 +214,11 @@ export class UserDAO extends Models.DAO<IUser> {
    *
    * @param {string} id
    * @param {IUser} obj
-   * @returns {JSData.JSDataPromise<IUser>}
+   * @returns {Promise<IUser>}
    *
    * @memberOf UserDAO
    */
-  public sendUpdate(id: string, obj: IUser): JSData.JSDataPromise<IUser> {
+  public sendUpdate(id: string, obj: IUser): Promise<IUser> {
     return this.collection.update(id, obj)
   }
 
@@ -232,13 +230,13 @@ export class UserDAO extends Models.DAO<IUser> {
    * @param {number} [page]
    * @param {number} [limit]
    * @param {string[]} [order]
-   * @returns {JSData.JSDataPromise<IResultSearch<IUser>>}
+   * @returns {Promise<IResultSearch<IUser>>}
    *
    * @memberOf UserDAO
    */
   paginatedQuery(
     search: Object, user: any, page?: number, limit?: number, order?: string[]
-  ): JSData.JSDataPromise<Interfaces.IResultSearch<IUser>> {
+  ): Promise<Interfaces.IResultSearch<IUser>> {
     let _page: number = page || 1
     let _limit: number = limit || 10
     let _order: string[] = []
@@ -248,7 +246,7 @@ export class UserDAO extends Models.DAO<IUser> {
       limit: _limit
     })
 
-    return Bluebird.all([
+    return Promise.all([
       this.collection.findAll(search),
       this.collection.findAll(params)
     ])

@@ -36,13 +36,11 @@ export class District extends Models.BaseModel implements IDistrict {
  * @extends {Models.DAO<ISource>}
  */
 export class DistrictDAO extends Models.DAO<IDistrict> {
-  storedb: JSData.DS
+  storedb: JSData.DataStore
   serviceLib: Services.ServiceLib
   sendMail: Services.SendMail
-  constructor(store: JSData.DS, appConfig: Config.AppConfig) {
-    const districts = store.defineResource<IDistrict>({
-      name: 'districts'
-    })
+  constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
+    const districts = store.defineMapper('districts', {})
     super(districts)
     this.storedb = store
   }
@@ -52,11 +50,11 @@ export class DistrictDAO extends Models.DAO<IDistrict> {
    *
    * @param {User} obj
    * @param {*} userP
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public create(obj: IDistrict, userP: any): JSData.JSDataPromise<IDistrict> {
+  public create(obj: IDistrict, userP: any): Promise<IDistrict> {
     let district: District = new District(obj)
     let objFilterName = { where: { name: { '===': district.name } } }
     return this.collection.findAll(objFilterName)
@@ -77,11 +75,11 @@ export class DistrictDAO extends Models.DAO<IDistrict> {
    * @param {string} id
    * @param {ICategory} obj
    * @param {*} user
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public update(id: string, user: IUser, obj: IDistrict): JSData.JSDataPromise<IDistrict> {
+  public update(id: string, user: IUser, obj: IDistrict): Promise<IDistrict> {
     let exclude = [
       'id', 'active', 'updatedAt', 'createdAt'
     ]
@@ -114,11 +112,11 @@ export class DistrictDAO extends Models.DAO<IDistrict> {
    * Deleta uma fonte de informação
    *
    * @param {string} id
-   * @returns {JSData.JSDataPromise<boolean>}
+   * @returns {Promise<boolean>}
    *
    * @memberOf SourceDAO
    */
-  public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
+  public delete(id: string, user: any): Promise<boolean> {
     return this.collection.find(id)
       .then((district: IDistrict) => {
         if (_.isEmpty(district)) {
@@ -135,11 +133,11 @@ export class DistrictDAO extends Models.DAO<IDistrict> {
    *
    * @param {string} id
    * @param {ICategory} obj
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public sendUpdate(id: string, obj: IDistrict): JSData.JSDataPromise<IDistrict> {
+  public sendUpdate(id: string, obj: IDistrict): Promise<IDistrict> {
     return this.collection.update(id, obj)
   }
 

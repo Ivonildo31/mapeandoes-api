@@ -5,7 +5,7 @@ import * as JSData from 'js-data'
 import { Config } from 'js-data-dao'
 
 export class CategoryController extends Controllers.BasePersistController<ICategory> {
-  public constructor(store: JSData.DS, appConfig: Config.AppConfig) {
+  public constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
     super(new CategoryDAO(store, appConfig))
   }
 }

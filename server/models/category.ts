@@ -38,12 +38,10 @@ export class Category extends Models.BaseModel implements ICategory {
  * @extends {Models.DAO<ISource>}
  */
 export class CategoryDAO extends Models.DAO<ICategory> {
-  storedb: JSData.DS
   serviceLib: Services.ServiceLib
   sendMail: Services.SendMail
-  constructor(store: JSData.DS, appConfig: Config.AppConfig) {
-    const categories = store.defineResource<ICategory>({
-      name: 'categories',
+  constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
+    const categories = store.defineMapper('categories',{
       relations: {
         belongsTo: {
           users: {
@@ -54,7 +52,6 @@ export class CategoryDAO extends Models.DAO<ICategory> {
       }
     })
     super(categories, ['users'])
-    this.storedb = store
   }
 
   /**
@@ -62,11 +59,11 @@ export class CategoryDAO extends Models.DAO<ICategory> {
    *
    * @param {User} obj
    * @param {*} userP
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public create(obj: ICategory, userP: any): JSData.JSDataPromise<ICategory> {
+  public create(obj: ICategory, userP: any): Promise<ICategory> {
     let category: Category = new Category(obj)
     let objFilterName = { where: { name: { '===': category.name } } }
     return this.collection.findAll(objFilterName)
@@ -88,11 +85,11 @@ export class CategoryDAO extends Models.DAO<ICategory> {
    * @param {string} id
    * @param {ICategory} obj
    * @param {*} user
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public update(id: string, user: IUser, obj: ICategory): JSData.JSDataPromise<ICategory> {
+  public update(id: string, user: IUser, obj: ICategory): Promise<ICategory> {
     let exclude = [
       'id', 'active', 'updatedAt', 'createdAt', 'user'
     ]
@@ -126,11 +123,11 @@ export class CategoryDAO extends Models.DAO<ICategory> {
    * Deleta uma fonte de informação
    *
    * @param {string} id
-   * @returns {JSData.JSDataPromise<boolean>}
+   * @returns {Promise<boolean>}
    *
    * @memberOf SourceDAO
    */
-  public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
+  public delete(id: string, user: any): Promise<boolean> {
     return this.collection.find(id)
       .then((category: ICategory) => {
         if (_.isEmpty(category)) {
@@ -147,11 +144,11 @@ export class CategoryDAO extends Models.DAO<ICategory> {
    *
    * @param {string} id
    * @param {ICategory} obj
-   * @returns {JSData.JSDataPromise<ICategory>}
+   * @returns {Promise<ICategory>}
    *
    * @memberOf SourceDAO
    */
-  public sendUpdate(id: string, obj: ICategory): JSData.JSDataPromise<ICategory> {
+  public sendUpdate(id: string, obj: ICategory): Promise<ICategory> {
     return this.collection.update(id, obj)
   }
 

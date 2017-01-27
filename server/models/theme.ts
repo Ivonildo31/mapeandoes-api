@@ -28,13 +28,11 @@ export class Theme extends Models.BaseModel implements ITheme {
  * @extends {Models.DAO<ITheme>}
  */
 export class ThemeDAO extends Models.DAO<ITheme> {
-  storedb: JSData.DS
+  storedb: JSData.DataStore
   serviceLib: Services.ServiceLib
   sendMail: Services.SendMail
-  constructor(store: JSData.DS, appConfig: Config.AppConfig) {
-    const users = store.defineResource<ITheme>({
-      name: 'themes'
-    })
+  constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
+    const users = store.defineMapper('themes')
     super(users, [])
     this.storedb = store
   }
@@ -44,17 +42,17 @@ export class ThemeDAO extends Models.DAO<ITheme> {
    *
    * @param {User} obj
    * @param {*} userP
-   * @returns {JSData.JSDataPromise<ITheme>}
+   * @returns {Promise<ITheme>}
    *
    * @memberOf ThemeDAO
    */
-  public create(obj: ITheme, userP: any): JSData.JSDataPromise<ITheme> {
+  public create(obj: ITheme, userP: any): Promise<ITheme> {
     let theme: Theme = new Theme(obj)
     let objFilterName = { where: { name: { '===': theme.name } } }
     return this.collection.findAll(objFilterName)
       .then((themes: Array<ITheme>) => {
         if (!_.isEmpty(themes)) {
-          throw 'Exists other with same name'
+          throw new Error('O Tema já está em uso')
         } else {
           return this.collection.create(theme)
         }
@@ -69,11 +67,11 @@ export class ThemeDAO extends Models.DAO<ITheme> {
    * @param {string} id
    * @param {ITheme} obj
    * @param {*} user
-   * @returns {JSData.JSDataPromise<ITheme>}
+   * @returns {Promise<ITheme>}
    *
    * @memberOf ThemeDAO
    */
-  public update(id: string, user: IUser, obj: ITheme): JSData.JSDataPromise<ITheme> {
+  public update(id: string, user: IUser, obj: ITheme): Promise<ITheme> {
     let exclude = [
       'id', 'active', 'updatedAt', 'createdAt'
     ]
@@ -106,11 +104,11 @@ export class ThemeDAO extends Models.DAO<ITheme> {
    * Deleta uma fonte de informação
    *
    * @param {string} id
-   * @returns {JSData.JSDataPromise<boolean>}
+   * @returns {Promise<boolean>}
    *
    * @memberOf ThemeDAO
    */
-  public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
+  public delete(id: string, user: any): Promise<boolean> {
     return this.collection.find(id)
       .then((theme: ITheme) => {
         if (_.isEmpty(theme)) {
@@ -127,11 +125,11 @@ export class ThemeDAO extends Models.DAO<ITheme> {
    *
    * @param {string} id
    * @param {ITheme} obj
-   * @returns {JSData.JSDataPromise<ITheme>}
+   * @returns {Promise<ITheme>}
    *
    * @memberOf ThemeDAO
    */
-  public sendUpdate(id: string, obj: ITheme): JSData.JSDataPromise<ITheme> {
+  public sendUpdate(id: string, obj: ITheme): Promise<ITheme> {
     return this.collection.update(id, obj)
   }
 

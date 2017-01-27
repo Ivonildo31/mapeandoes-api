@@ -28,13 +28,11 @@ export class Source extends Models.BaseModel implements ISource {
  * @extends {Models.DAO<ISource>}
  */
 export class SourceDAO extends Models.DAO<ISource> {
-  storedb: JSData.DS
+  storedb: JSData.DataStore
   serviceLib: Services.ServiceLib
   sendMail: Services.SendMail
-  constructor(store: JSData.DS, appConfig: Config.AppConfig) {
-    const sources = store.defineResource<ISource>({
-      name: 'sources'
-    })
+  constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
+    const sources = store.defineMapper('sources')
     super(sources, [])
     this.storedb = store
   }
@@ -44,11 +42,11 @@ export class SourceDAO extends Models.DAO<ISource> {
    *
    * @param {User} obj
    * @param {*} userP
-   * @returns {JSData.JSDataPromise<ISource>}
+   * @returns {Promise<ISource>}
    *
    * @memberOf SourceDAO
    */
-  public create(obj: ISource, userP: any): JSData.JSDataPromise<ISource> {
+  public create(obj: ISource, userP: any): Promise<ISource> {
     let source: Source = new Source(obj)
     let objFilterName = { where: { name: { '===': source.name } } }
     return this.collection.findAll(objFilterName)
@@ -69,11 +67,11 @@ export class SourceDAO extends Models.DAO<ISource> {
    * @param {string} id
    * @param {ISource} obj
    * @param {*} user
-   * @returns {JSData.JSDataPromise<ISource>}
+   * @returns {Promise<ISource>}
    *
    * @memberOf SourceDAO
    */
-  public update(id: string, user: IUser, obj: ISource): JSData.JSDataPromise<ISource> {
+  public update(id: string, user: IUser, obj: ISource): Promise<ISource> {
     let exclude = [
       'id', 'active', 'updatedAt', 'createdAt'
     ]
@@ -106,11 +104,11 @@ export class SourceDAO extends Models.DAO<ISource> {
    * Deleta uma fonte de informação
    *
    * @param {string} id
-   * @returns {JSData.JSDataPromise<boolean>}
+   * @returns {Promise<boolean>}
    *
    * @memberOf SourceDAO
    */
-  public delete(id: string, user: any): JSData.JSDataPromise<boolean> {
+  public delete(id: string, user: any): Promise<boolean> {
     return this.collection.find(id)
       .then((source: ISource) => {
         if (_.isEmpty(source)) {
@@ -127,11 +125,11 @@ export class SourceDAO extends Models.DAO<ISource> {
    *
    * @param {string} id
    * @param {ISource} obj
-   * @returns {JSData.JSDataPromise<ISource>}
+   * @returns {Promise<ISource>}
    *
    * @memberOf SourceDAO
    */
-  public sendUpdate(id: string, obj: ISource): JSData.JSDataPromise<ISource> {
+  public sendUpdate(id: string, obj: ISource): Promise<ISource> {
     return this.collection.update(id, obj)
   }
 
