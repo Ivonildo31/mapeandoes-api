@@ -4,12 +4,11 @@ import { DistrictRouter } from './district-router'
 import { ThemeRouter } from './theme-router'
 import { DemandRouter } from './demand-router'
 import { CategoryRouter } from './category-router'
-import { Passport } from 'passport'
 import * as express from 'express'
 import * as JSData from 'js-data'
 import { Config } from 'js-data-dao'
 export namespace main {
-  export const callRoutes = (app: express.Application, store: JSData.DataStore, passport: Passport, appConfig: Config.AppConfig): express.Application => {
+  export const callRoutes = (app: express.Application, store: JSData.DataStore, passport: any, appConfig: Config.AppConfig): express.Application => {
     app.use('/api/v1/users', new UserRouter(store, appConfig).getRouter())
     app.use('/api/v1/sources', new SourceRouter(store, appConfig).getRouter())
     app.use('/api/v1/districts', new DistrictRouter(store, appConfig).getRouter())
