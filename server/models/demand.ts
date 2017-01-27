@@ -20,6 +20,8 @@ export class Demand extends Models.BaseModel implements IDemand {
   category: ICategory
   userId: string
   user: IUser
+
+  approved: boolean
   districts: IDistrict[]
   themes: ITheme[]
   source: ISource
@@ -36,6 +38,7 @@ export class Demand extends Models.BaseModel implements IDemand {
     this.themes = obj.themes
     this.sourceId = obj.sourceId
     this.pins = obj.pins
+    this.approved = obj.approved || false
   }
 }
 
