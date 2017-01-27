@@ -12,9 +12,6 @@ dependencies:
     - rm -rf node_modules/bcrypt
     - rm -rf node_modules/typescript
     - yarn
-    #removendo a linha com  problema no projeto no typescript 2.1.5
-    - sed '3168d'  node_modules/typescript/lib/typescript.js >>  node_modules/typescript/lib/typescript_new.js
-    - cp  node_modules/typescript/lib/typescript_new.js  node_modules/typescript/lib/typescript.js
     - gulp ts
     - docker info
     - docker build -t $OWNER/$CONTAINER_NAME .
