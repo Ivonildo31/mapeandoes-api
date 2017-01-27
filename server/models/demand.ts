@@ -2,8 +2,9 @@ import { IDemand, ICategory, IDistrict, ITheme, ISource, IUser, IPin } from '@pr
 import * as Bluebird from 'bluebird'
 import * as JSData from 'js-data'
 import * as _ from 'lodash'
-import { Config, Services, Models } from 'js-data-dao'
-
+import { Config, Services, Models, Interfaces } from 'js-data-dao'
+import {Source} from './source'
+import {Category} from './category'
 /**
  * classe da fonte de informação
  *
@@ -15,7 +16,7 @@ import { Config, Services, Models } from 'js-data-dao'
 export class Demand extends Models.BaseModel implements IDemand {
   title: string
   description: string
-  externalUserId: string
+  externalUser: { id: string, name: string }
   categoryId: string
   category: ICategory
   userId: string
@@ -32,11 +33,13 @@ export class Demand extends Models.BaseModel implements IDemand {
     super(obj.id)
     this.title = obj.title
     this.description = obj.description
-    this.externalUserId = obj.externalUserId
-    this.categoryId = obj.categoryId
+    this.externalUser = obj.externalUser
     this.districts = obj.districts
     this.themes = obj.themes
     this.sourceId = obj.sourceId
+    this.source = obj.source !== undefined ? new Source(obj.source) : null
+    this.categoryId = obj.categoryId
+    this.category = obj.category !== undefined ? new Category(obj.category) : null
     this.pins = obj.pins
     this.approved = obj.approved || false
   }
@@ -53,7 +56,7 @@ export class DemandDAO extends Models.DAO<IDemand> {
   storedb: JSData.DataStore
   serviceLib: Services.ServiceLib
   constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
-    const demands = store.defineMapper('demands',{
+    const demands = store.defineMapper('demands', {
       relations: {
         belongsTo: {
           users: {
@@ -110,9 +113,9 @@ export class DemandDAO extends Models.DAO<IDemand> {
     let newObj: IDemand = Services.ServiceLib.fieldsUpValidator(obj, Object.keys(obj), userFieldsUp)
 
     return this.collection.find(id)
-      .then((category: IDemand) => {
-        if (_.isEmpty(category)) { throw 'Demand not found.' }
-        return Bluebird.all([category, newObj])
+      .then((demand: IDemand) => {
+        if (_.isEmpty(demand)) { throw 'Demand not found.' }
+        return Bluebird.all([demand, newObj])
       })
       .then((resp: any) => {
         let demands: IDemand = resp[0]
@@ -161,6 +164,38 @@ export class DemandDAO extends Models.DAO<IDemand> {
    */
   public sendUpdate(id: string, obj: IDemand): Promise<IDemand> {
     return this.collection.update(id, obj)
+  }
+
+  public findAll(query: Object = {}, user: IUser): Promise<Array<Demand>> {
+    return this.collection.findAll(query,this.options)
+      .then((values: Demand[]) => {
+        return values.map(d => new Demand(d))
+      })
+  }
+
+  paginatedQuery(
+    search: Object, user: IUser, page?: number, limit?: number, order?: Array<string>
+  ): Promise<Interfaces.IResultSearch<IDemand>> {
+    let _page: number = page || 1
+    let _limit: number = limit || 10
+    let _order: string[] = []
+    let params = Object.assign({}, search, {
+      orderBy: _order,
+      offset: _limit * (_page - 1),
+      limit: _limit
+    })
+
+    return this.collection.findAll(search)
+      .then((countResult) => {
+        return this.collection.findAll(params, this.options)
+          .then((results: IDemand[]) => {
+            return {
+              page: _page,
+              total: countResult.length,
+              result: results.map(d => new Demand(d))
+            } as Interfaces.IResultSearch<IDemand>
+          })
+      })
   }
 
 }

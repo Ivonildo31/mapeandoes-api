@@ -30,6 +30,7 @@ export class Category extends Models.BaseModel implements ICategory {
   }
 }
 
+
 /**
  * classe de persistencia da fonte de informação
  *
