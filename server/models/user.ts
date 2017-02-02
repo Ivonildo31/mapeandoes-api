@@ -38,8 +38,8 @@ export class User extends Models.BaseModel implements IUser {
 export class UserDAO extends Models.DAO<IUser> {
   storedb: JSData.DataStore
   serviceLib: Services.ServiceLib
-  constructor(store: JSData.DataStore, appConfig: Config.AppConfig) {
-    const users = store.defineMapper('users')
+  constructor(store: JSData.DataStore, appConfig: Config.AppConfig, userDef? : JSData.Mapper) {
+    const users = userDef || store.defineMapper('users')
     super(users)
     this.storedb = store
     this.serviceLib = new Services.ServiceLib(appConfig)

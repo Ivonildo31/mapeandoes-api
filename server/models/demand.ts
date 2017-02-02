@@ -3,8 +3,8 @@ import * as Bluebird from 'bluebird'
 import * as JSData from 'js-data'
 import * as _ from 'lodash'
 import { Config, Services, Models, Interfaces } from 'js-data-dao'
-import {Source} from './source'
-import {Category} from './category'
+import { Source } from './source'
+import { Category } from './category'
 /**
  * classe da fonte de informação
  *
@@ -16,7 +16,7 @@ import {Category} from './category'
 export class Demand extends Models.BaseModel implements IDemand {
   title: string
   description: string
-  externalUser: { id: string, name: string }
+  externalUser: { id: string, name: string, email: string }
   categoryId: string
   category: ICategory
   userId: string
@@ -166,14 +166,65 @@ export class DemandDAO extends Models.DAO<IDemand> {
     return this.collection.update(id, obj)
   }
 
-  public findAll(query: Object = {}, user: IUser): Promise<Array<Demand>> {
-    return this.collection.findAll(query,this.options)
+  public findAll(query: any = {}, user: IUser): Promise<Array<Demand>> {
+    if (query.where) {
+      if (Array.isArray(query.where)) {
+        query.where.push({ approved: true })
+      } else {
+        query.where = [query.where, { approved: true }]
+      }
+    } else {
+      query.where = { approved: true }
+    }
+    return this.collection.findAll(query, this.options)
+      .then((values: Demand[]) => {
+        return values.map(d => new Demand(d))
+      })
+  }
+
+  public findAllSecure(query: Object = {}, user: IUser): Promise<Array<Demand>> {
+    return this.collection.findAll(query, this.options)
       .then((values: Demand[]) => {
         return values.map(d => new Demand(d))
       })
   }
 
   paginatedQuery(
+    search: any, user: IUser, page?: number, limit?: number, order?: Array<string>
+  ): Promise<Interfaces.IResultSearch<IDemand>> {
+    let _page: number = page || 1
+    let _limit: number = limit || 10
+    let _order: string[] = []
+    let params = Object.assign({}, search, {
+      orderBy: _order,
+      offset: _limit * (_page - 1),
+      limit: _limit
+    })
+
+    if (search.where) {
+      if (Array.isArray(search.where)) {
+        search.where.push({ approved: true })
+      } else {
+        search.where = [search.where, { approved: true }]
+      }
+    } else {
+      search.where = { approved: true }
+    }
+
+    return this.collection.findAll(search)
+      .then((countResult) => {
+        return this.collection.findAll(params, this.options)
+          .then((results: IDemand[]) => {
+            return {
+              page: _page,
+              total: countResult.length,
+              result: results.map(d => new Demand(d))
+            } as Interfaces.IResultSearch<IDemand>
+          })
+      })
+  }
+
+  paginatedQuerySecure(
     search: Object, user: IUser, page?: number, limit?: number, order?: Array<string>
   ): Promise<Interfaces.IResultSearch<IDemand>> {
     let _page: number = page || 1
@@ -195,6 +246,24 @@ export class DemandDAO extends Models.DAO<IDemand> {
               result: results.map(d => new Demand(d))
             } as Interfaces.IResultSearch<IDemand>
           })
+      })
+  }
+
+  public find(id: string, user: any): Promise<IDemand> {
+    return this.collection.find(id, this.options)
+      .then((demand: IDemand) => {
+        if (demand.approved) {
+          return demand
+        } else {
+          throw 'Demanda não encontrada'
+        }
+      })
+  }
+
+  public findSecure(id: string, user: any): Promise<IDemand> {
+    return this.collection.find(id, this.options)
+      .then((demand: IDemand) => {
+        return demand
       })
   }
 
