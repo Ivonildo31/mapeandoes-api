@@ -39,7 +39,6 @@ export namespace main {
         apiId: 'api-detran'
       }
     }))
-
     app.use(`${pathRoute}/api/v1/secure/demands`, validateAtEndpoint, new DemandSecureRouter(store, appConfig).getRouter())
     /**
      * rota para obter dados do usuário logado
