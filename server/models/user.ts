@@ -32,6 +32,11 @@ export class User extends Models.BaseModel implements IUser {
     this.isAdmin = obj.isAdmin || false
     this.externalId = obj.externalId
     this.companyAlias = obj.companyAlias
+
+    // fix do  js-data-dao antigo
+    this.active = obj.active || true
+    this.createdAt = obj.createdAt || new Date()
+    this.updatedAt = obj.updatedAt || new Date()
   }
 }
 

@@ -42,6 +42,11 @@ export class Demand extends Models.BaseModel implements IDemand {
     this.category = obj.category !== undefined ? new Category(obj.category) : null
     this.pins = obj.pins
     this.approved = obj.approved || false
+
+    // fix do  js-data-dao antigo
+    this.active = obj.active || true
+    this.createdAt = obj.createdAt || new Date()
+    this.updatedAt = obj.updatedAt || new Date()
   }
 }
 

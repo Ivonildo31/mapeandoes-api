@@ -27,6 +27,11 @@ export class Category extends Models.BaseModel implements ICategory {
     this.issue = obj.issue || true
     this.iconUrl = obj.iconUrl
     this.markerColor = obj.markerColor
+
+    // fix do  js-data-dao antigo
+    this.active = obj.active || true
+    this.createdAt = obj.createdAt || new Date()
+    this.updatedAt = obj.updatedAt || new Date()
   }
 }
 

@@ -25,6 +25,11 @@ export class District extends Models.BaseModel implements IDistrict {
       lat: obj.location.lat,
       lon: obj.location.lon
     }
+
+    // fix do  js-data-dao antigo
+    this.active = obj.active || true
+    this.createdAt = obj.createdAt || new Date()
+    this.updatedAt = obj.updatedAt || new Date()
   }
 }
 

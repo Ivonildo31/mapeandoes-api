@@ -17,6 +17,11 @@ export class Theme extends Models.BaseModel implements ITheme {
   constructor(obj: ITheme) {
     super(obj.id)
     this.name = obj.name
+
+    // fix do  js-data-dao antigo
+    this.active = obj.active || true
+    this.createdAt = obj.createdAt || new Date()
+    this.updatedAt = obj.updatedAt || new Date()
   }
 }
 
