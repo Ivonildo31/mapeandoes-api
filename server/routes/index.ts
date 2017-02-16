@@ -13,7 +13,7 @@ import { duration, max, perSecond, pathRoute } from '../config/api-middleware'
 import { jwtPublicKey } from '../config/acesso-cidadao'
 import { redisUrl } from '../config/redis'
 import { userInfoUrl } from '../config/acesso-cidadao'
-const validateAtEndpoint = require('node-mw-api-prodest').validateAtEndpoint(userInfoUrl)
+const validateAtEndpoint = require('node-mw-api-prodest').authorize(userInfoUrl, 'moderador')
 
 export namespace main {
   export const callRoutes = (app: express.Application, store: JSData.DataStore, passport: any, appConfig: Config.AppConfig): express.Application => {
