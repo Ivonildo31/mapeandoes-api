@@ -4,6 +4,7 @@ import { DistrictRouter } from './district-router'
 import { ThemeRouter } from './theme-router'
 import { DemandRouter } from './demand-router'
 import { DemandSecureRouter } from './demand-secure-router'
+import { DemandAuthRouter } from './demand-auth-router'
 import { CategoryRouter } from './category-router'
 import * as express from 'express'
 import * as JSData from 'js-data'
@@ -13,7 +14,8 @@ import { duration, max, perSecond, pathRoute } from '../config/api-middleware'
 import { jwtPublicKey } from '../config/acesso-cidadao'
 import { redisUrl } from '../config/redis'
 import { userInfoUrl } from '../config/acesso-cidadao'
-const validateAtEndpoint = require('node-mw-api-prodest').authorize(userInfoUrl, 'moderador')
+const validateAuth = require('node-mw-api-prodest').validateAtEndpoint(userInfoUrl)
+const validateModerador = require('node-mw-api-prodest').authorize(userInfoUrl, 'moderador')
 
 export namespace main {
   export const callRoutes = (app: express.Application, store: JSData.DataStore, passport: any, appConfig: Config.AppConfig): express.Application => {
@@ -39,7 +41,8 @@ export namespace main {
         apiId: 'api-detran'
       }
     }))
-    app.use(`${pathRoute}/api/v1/secure/demands`, validateAtEndpoint, new DemandSecureRouter(store, appConfig).getRouter())
+    app.use(`${pathRoute}/api/v1/auth/demands`, validateAuth, new DemandAuthRouter(store, appConfig).getRouter())
+    app.use(`${pathRoute}/api/v1/secure/demands`, validateModerador, new DemandSecureRouter(store, appConfig).getRouter())
     /**
      * rota para obter dados do usuário logado
      */
