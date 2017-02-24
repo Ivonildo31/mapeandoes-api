@@ -108,28 +108,18 @@ export class DemandDAO extends Models.DAO<IDemand> {
    *
    * @memberOf SourceDAO
    */
-  public update(id: string, user: IUser, obj: IDemand): Promise<IDemand> {
+  public update(id: string, obj: IDemand): Promise<IDemand> {
     let exclude = [
       'id', 'active', 'updatedAt', 'createdAt', 'user', 'source', 'category'
     ]
 
-    let userFieldsUp = ['title', 'description', 'externalUserId', 'demandId', 'categoryId', 'districts', 'themes', 'sourceId', 'pins']
+    let userFieldsUp = ['title', 'approved', 'description', 'externalUserId', 'demandId', 'categoryId', 'districts', 'themes', 'sourceId', 'pins']
 
     let newObj: IDemand = Services.ServiceLib.fieldsUpValidator(obj, Object.keys(obj), userFieldsUp)
 
     return this.collection.find(id)
       .then((demand: IDemand) => {
         if (_.isEmpty(demand)) { throw 'Demand not found.' }
-        return Bluebird.all([demand, newObj])
-      })
-      .then((resp: any) => {
-        let demands: IDemand = resp[0]
-        let newObj: IDemand = resp[1]
-        return Bluebird.all([demands, newObj])
-      })
-      .then((resp: any) => {
-        let demand: IDemand = resp[0]
-        let newObj: IDemand = resp[1]
         _.merge(demand, newObj)
         if (!Services.ServiceLib.validateFields(demand, Object.keys(demand), exclude)) {
           throw 'Alguns dados estão em branco, preencha-os e tente novamente.'
