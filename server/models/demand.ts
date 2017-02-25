@@ -110,7 +110,7 @@ export class DemandDAO extends Models.DAO<IDemand> {
    */
   public update(id: string, obj: IDemand): Promise<IDemand> {
     let exclude = [
-      'id', 'active', 'updatedAt', 'createdAt', 'user', 'source', 'category'
+      'id', 'active', 'updatedAt', 'createdAt', 'user', 'source', 'category', 'pins', 'districts'
     ]
 
     let userFieldsUp = ['title', 'approved', 'description', 'externalUserId', 'demandId', 'categoryId', 'districts', 'themes', 'sourceId', 'pins']
