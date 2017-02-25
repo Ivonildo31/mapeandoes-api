@@ -84,6 +84,7 @@ export class DemandController {
         return reg
       })
       .catch((error: Error) => {
+        console.error(error)
         throw new Services.APIError(error.message, 400)
       })
   }

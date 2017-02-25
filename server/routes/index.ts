@@ -38,7 +38,7 @@ export namespace main {
         duration: parseInt(duration, 10) * 60 * 1000,
         perSecond: parseInt(perSecond, 10),
         redisUrl: redisUrl,
-        apiId: 'api-detran'
+        apiId: 'api-demandas'
       }
     }))
     app.use(`${pathRoute}/api/v1/auth/demands`, validateAuth, new DemandAuthRouter(store, appConfig).getRouter())
