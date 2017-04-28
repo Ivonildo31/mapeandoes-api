@@ -77,7 +77,7 @@ export class DemandController {
   }
 
   public update(req: any, res: Response, next?: NextFunction): Promise<IDemand> {
-    return this.collection.update(req.params.id, req.body)
+    return this.collection.update(req.params.id, null, req.body)
       .then((reg: IDemand) => {
         delete (reg as any).password
         res.status(200)
