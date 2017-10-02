@@ -266,7 +266,7 @@ export class DemandDAO extends Models.DAO<IDemand> {
       })
   }
 
-  private sortByDate( query: any ){
+  private sortByDate( query: any ) {
     const dateOrderByDesc = ['createdAt', 'DESC']
     // Adiciona orderBy
     if ( !query.orderBy ) {
