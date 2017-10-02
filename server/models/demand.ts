@@ -170,13 +170,17 @@ export class DemandDAO extends Models.DAO<IDemand> {
     } else {
       query.where = { approved: true }
     }
+
+    query = this.sortByDate(query)
+
     return this.collection.findAll( query, this.options )
       .then(( values: Demand[] ) => {
         return values.map( d => new Demand( d ) )
       })
   }
 
-  public findAllSecure( query: Object = {}, user: IUser ): Promise<Array<Demand>> {
+  public findAllSecure( query: any = {}, user: IUser ): Promise<Array<Demand>> {
+    query = this.sortByDate(query)
     return this.collection.findAll( query, this.options )
       .then(( values: Demand[] ) => {
         return values.map( d => new Demand( d ) )
@@ -204,6 +208,8 @@ export class DemandDAO extends Models.DAO<IDemand> {
     } else {
       params.where = { approved: true }
     }
+
+    params = this.sortByDate(params)
 
     return this.collection.count( { where: params.where || {} })
       .then(( countResult ) => {
@@ -260,4 +266,20 @@ export class DemandDAO extends Models.DAO<IDemand> {
       })
   }
 
+  private sortByDate( query: any ){
+    const dateOrderByDesc = ['createdAt', 'DESC']
+    // Adiciona orderBy
+    if ( !query.orderBy ) {
+      query.orderBy = [ dateOrderByDesc ]
+    } else {
+      if ( typeof query.orderBy === 'string' ) {
+        query.orderBy = [ query.orderBy ]
+      }
+      if ( query.orderBy.constructor === Array ) {
+        query.orderBy.push( dateOrderByDesc )
+      }
+    }
+
+    return query
+  }
 }
