@@ -7,8 +7,6 @@ interfaces/*.js
 interfaces/*.js.map
 server/**/*.js
 server/**/*.js.map
-gulpfile.js
-gulpfile.js.map
 typings
 # Logs
 logs
